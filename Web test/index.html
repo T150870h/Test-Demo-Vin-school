@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Thu thập dữ liệu</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f4fbff;
+    }
+    img {
+      width: 320px;
+      border: 3px solid #4caf50;
+      border-radius: 10px;
+    }
+    .choices {
+      display: flex;
+      gap: 18px;
+      justify-content: center;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .choice {
+      background: #ffffff;
+      padding: 12px 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      min-width: 220px;
+    }
+    .result-table {
+      border-collapse: collapse;
+      margin: 12px auto;
+      min-width: 520px;
+    }
+    .result-table th, .result-table td {
+      border: 1px solid #d0d7de;
+      padding: 8px 10px;
+      text-align: center;
+    }
+    .result-table img { width: 100px; height: auto; display: block; margin: 0 auto; }
+    button {
+      font-size: 22px;
+      padding: 10px 20px;
+      margin: 5px;
+    }
+    .box {
+      margin-top: 20px;
+      font-size: 24px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>👀 Quan sát bức ảnh</h1>
+
+<div id="qinfo" style="font-size:20px;margin-bottom:8px">Câu 1 / 5</div>
+<img id="photo" src="./Image/Image1.png" alt="Côn trùng">
+
+<p id="prompt"><b>Em hãy đếm số con ong 🐝 trong bức ảnh</b></p>
+
+<!-- Các lựa chọn (xếp ngang) -->
+<div class="choices">
+  <div class="choice">
+    <h2>🔢 Ghi bằng số</h2>
+    <button id="addNumberBtn" onclick="addNumber()">➕</button>
+    <button id="removeNumberBtn" onclick="removeNumber()">➖</button>
+    <div class="box">Số con ong: <span id="number">0</span></div>
+  </div>
+
+  <div class="choice">
+    <h2>✍️ Ghi bằng vạch kiểm</h2>
+    <button id="addTallyBtn" onclick="addTally()">Thêm vạch |</button>
+    <button id="removeTallyBtn" onclick="removeTally()">Xoá vạch</button>
+    <div class="box" id="tally"></div>
+  </div>
+
+  <div class="choice">
+    <h2>⭐ Ghi bằng ký hiệu</h2>
+    <button id="addIconBtn" onclick="addIcon()">🐝</button>
+    <button id="removeIconBtn" onclick="removeIcon()">Xoá con ong</button>
+    <div class="box" id="icons"></div>
+  </div>
+</div>
+
+<hr>
+
+<div style="margin-top:12px">
+  <button id="answerBtn" onclick="submitAnswer()" disabled>Trả lời</button>
+</div>
+
+<h2 id="result"></h2>
+
+<script>
+let number = 0;
+let tally = "";
+let icons = "";
+let selectedMethod = null; // 'number' | 'tally' | 'icons' or null
+const questions = [
+  {img: './Image/Image1.png', prompt: 'Em hãy đếm số con ong 🐝 trong bức ảnh 1'},
+  {img: './Image/Image2.png', prompt: 'Em hãy đếm số con ong 🐝 trong bức ảnh 2'},
+  {img: './Image/Image3.png', prompt: 'Em hãy đếm số con ong 🐝 trong bức ảnh 3'},
+  {img: './Image/Image4.png', prompt: 'Em hãy đếm số con ong 🐝 trong bức ảnh 4'},
+  {img: './Image/Image5.png', prompt: 'Em hãy đếm số con ong 🐝 trong bức ảnh 5'}
+];
+let currentQ = 0;
+const answers = [];
+
+function loadQuestion(idx = 0) {
+  currentQ = idx;
+  const q = questions[currentQ];
+  document.getElementById('photo').src = q.img;
+  document.getElementById('prompt').innerText = q.prompt;
+  document.getElementById('qinfo').innerText = `Câu ${currentQ+1} / ${questions.length}`;
+  // reset counters
+  number = 0; tally = ''; icons = '';
+  selectedMethod = null;
+  update();
+  document.getElementById('answerBtn').disabled = true;
+}
+
+function submitAnswer() {
+  // store a simple snapshot of counts
+  answers.push({
+    number: number,
+    tally: tally.length,
+    icons: (icons.match(/🐝/g) || []).length,
+  });
+  // move to next question or finish
+  if (currentQ < questions.length - 1) {
+    loadQuestion(currentQ + 1);
+  } else {
+    // finished - show summary as a table
+    const res = document.getElementById('result');
+    res.innerHTML = `<div>🎉 Hoàn thành! Bạn đã trả lời ${answers.length} câu.</div>`;
+    let html = '<table class="result-table"><thead><tr><th>Câu</th><th>Ảnh</th><th>Số</th><th>Vạch</th><th>Biểu tượng</th></tr></thead><tbody>';
+    answers.forEach((a, i) => {
+      const q = questions[i];
+      html += `<tr>` +
+              `<td>${i+1}</td>` +
+              `<td><img src="${q.img}" alt="img${i+1}"></td>` +
+              `<td>${a.number}</td>` +
+              `<td>${a.tally}</td>` +
+              `<td>${a.icons}</td>` +
+              `</tr>`;
+    });
+    html += '</tbody></table>';
+    res.innerHTML += html;
+    // disable controls
+    document.getElementById('answerBtn').disabled = true;
+  }
+}
+
+function addNumber() {
+  if (!selectedMethod) selectedMethod = 'number';
+  number++;
+  update();
+}
+function removeNumber() {
+  if (number > 0) number--;
+  // if number becomes zero and it was the selected method, clear selection
+  if (number === 0 && selectedMethod === 'number') selectedMethod = null;
+  update();
+}
+function addTally() {
+  if (!selectedMethod) selectedMethod = 'tally';
+  tally += "|";
+  update();
+}
+function addIcon() {
+  if (!selectedMethod) selectedMethod = 'icons';
+  icons += "🐝 ";
+  update();
+}
+
+function removeTally() {
+  if (tally.length > 0) {
+    tally = tally.slice(0, -1);
+    if (tally.length === 0 && selectedMethod === 'tally') selectedMethod = null;
+    update();
+  }
+}
+
+function removeIcon() {
+  const idx = icons.lastIndexOf('🐝');
+  if (idx !== -1) {
+    icons = icons.slice(0, idx).trim();
+    if (((icons.match(/🐝/g) || []).length) === 0 && selectedMethod === 'icons') selectedMethod = null;
+    update();
+  }
+}
+
+function update() {
+  document.getElementById("number").innerText = number;
+  document.getElementById("tally").innerText = tally;
+  document.getElementById("icons").innerText = icons;
+  document.getElementById("result").innerText =
+    "✅ Con đã thu thập dữ liệu về số con ong";
+  // enable 'Trả lời' button only after student has entered a count
+  const ready = number > 0 || tally.length > 0 || icons.length > 0;
+  const btn = document.getElementById('answerBtn');
+  if (btn) btn.disabled = !ready;
+
+  // lock other methods if one selected
+  updateMethodLock();
+}
+
+function updateMethodLock() {
+  const addNumberBtn = document.getElementById('addNumberBtn');
+  const removeNumberBtn = document.getElementById('removeNumberBtn');
+  const addTallyBtn = document.getElementById('addTallyBtn');
+  const removeTallyBtn = document.getElementById('removeTallyBtn');
+  const addIconBtn = document.getElementById('addIconBtn');
+  const removeIconBtn = document.getElementById('removeIconBtn');
+  if (!addNumberBtn) return;
+  if (!selectedMethod) {
+    addNumberBtn.disabled = false; removeNumberBtn.disabled = false;
+    addTallyBtn.disabled = false; removeTallyBtn.disabled = false;
+    addIconBtn.disabled = false; removeIconBtn.disabled = false;
+  } else if (selectedMethod === 'number') {
+    addNumberBtn.disabled = false; removeNumberBtn.disabled = false;
+    addTallyBtn.disabled = true; removeTallyBtn.disabled = true;
+    addIconBtn.disabled = true; removeIconBtn.disabled = true;
+  } else if (selectedMethod === 'tally') {
+    addNumberBtn.disabled = true; removeNumberBtn.disabled = true;
+    addTallyBtn.disabled = false; removeTallyBtn.disabled = false;
+    addIconBtn.disabled = true; removeIconBtn.disabled = true;
+  } else if (selectedMethod === 'icons') {
+    addNumberBtn.disabled = true; removeNumberBtn.disabled = true;
+    addTallyBtn.disabled = true; removeTallyBtn.disabled = true;
+    addIconBtn.disabled = false; removeIconBtn.disabled = false;
+  }
+}
+
+// initialize first question on load
+loadQuestion(0);
+</script>
+
+</body>
+</html>
