@@ -78,8 +78,8 @@
 
   <div class="choice">
     <h2>⭐ Ghi bằng ký hiệu</h2>
-    <button id="addIconBtn" onclick="addIcon()">🐝</button>
-    <button id="removeIconBtn" onclick="removeIcon()">Xoá con ong</button>
+    <button id="addIconBtn" onclick="addIcon()">⭐</button>
+    <button id="removeIconBtn" onclick="removeIcon()">Xoá hình ảnh</button>
     <div class="box" id="icons"></div>
   </div>
 </div>
@@ -99,10 +99,10 @@ let icons = "";
 let selectedMethod = null; // 'number' | 'tally' | 'icons' or null
 const questions = [
   {img: './Image/Image1.png', prompt: 'Em hãy đếm số con ong 🐝 trong bức ảnh 1'},
-  {img: './Image/Image2.png', prompt: 'Em hãy đếm số con ong 🐝 trong bức ảnh 2'},
-  {img: './Image/Image3.png', prompt: 'Em hãy đếm số con ong 🐝 trong bức ảnh 3'},
-  {img: './Image/Image4.png', prompt: 'Em hãy đếm số con ong 🐝 trong bức ảnh 4'},
-  {img: './Image/Image5.png', prompt: 'Em hãy đếm số con ong 🐝 trong bức ảnh 5'}
+  {img: './Image/Image2.png', prompt: 'Em hãy đếm số châu chấu 🦗 trong bức ảnh 2'},
+  {img: './Image/Image3.png', prompt: 'Em hãy đếm số Bông hoa 🌻 trong bức ảnh 3'},
+  {img: './Image/Image4.png', prompt: 'Em hãy đếm số ốc sên 🐌 trong bức ảnh 4'},
+  {img: './Image/Image5.png', prompt: 'Em hãy đếm số chú bướm 🦋 trong bức ảnh 5'}
 ];
 let currentQ = 0;
 const answers = [];
@@ -125,7 +125,7 @@ function submitAnswer() {
   answers.push({
     number: number,
     tally: tally.length,
-    icons: (icons.match(/🐝/g) || []).length,
+    icons: (icons.match(/⭐/g) || []).length,
   });
   // move to next question or finish
   if (currentQ < questions.length - 1) {
@@ -170,7 +170,7 @@ function addTally() {
 }
 function addIcon() {
   if (!selectedMethod) selectedMethod = 'icons';
-  icons += "🐝 ";
+  icons += "⭐ ";
   update();
 }
 
@@ -183,10 +183,10 @@ function removeTally() {
 }
 
 function removeIcon() {
-  const idx = icons.lastIndexOf('🐝');
+  const idx = icons.lastIndexOf('⭐');
   if (idx !== -1) {
     icons = icons.slice(0, idx).trim();
-    if (((icons.match(/🐝/g) || []).length) === 0 && selectedMethod === 'icons') selectedMethod = null;
+    if (((icons.match(/⭐/g) || []).length) === 0 && selectedMethod === 'icons') selectedMethod = null;
     update();
   }
 }
@@ -196,7 +196,7 @@ function update() {
   document.getElementById("tally").innerText = tally;
   document.getElementById("icons").innerText = icons;
   document.getElementById("result").innerText =
-    "✅ Con đã thu thập dữ liệu về số con ong";
+    "✅ Con đã thu thập dữ liệu về số lượng hình ảnh";
   // enable 'Trả lời' button only after student has entered a count
   const ready = number > 0 || tally.length > 0 || icons.length > 0;
   const btn = document.getElementById('answerBtn');
